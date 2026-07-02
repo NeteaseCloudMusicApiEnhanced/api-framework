@@ -6,20 +6,20 @@
 ## 安装
 
 ```bash
-npm install api-framework
+npm install @neteasecloudmusicapienhanced/api-framework
 ```
 
 全局安装：
 
 ```bash
-npm install -g api-framework
+npm install -g @neteasecloudmusicapienhanced/api-framework
 ```
 
 ## 快速开始
 
 ```bash
 # 创建新项目
-npx api-framework init my-project
+npx @neteasecloudmusicapienhanced/api-framework init my-project
 
 # 进入目录
 cd my-project
@@ -156,10 +156,10 @@ module.exports = {
 }
 ```
 
-## 作为 NPM 库使用
+## 作为 npm 库使用
 
 ```javascript
-const api = require('api-framework')
+const api = require('@neteasecloudmusicapienhanced/api-framework')
 
 // 启动服务器
 const app = await api.server.createApp()

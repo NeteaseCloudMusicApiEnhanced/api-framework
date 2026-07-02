@@ -15,20 +15,20 @@ A generic API reverse proxy framework for reverse engineers to build platform AP
 ## Install
 
 ```bash
-npm install api-framework
+npm install @neteasecloudmusicapienhanced/api-framework
 ```
 
 Global install:
 
 ```bash
-npm install -g api-framework
+npm install -g @neteasecloudmusicapienhanced/api-framework
 ```
 
 ## Quick Start
 
 ```bash
 # create a new project
-npx api-framework init my-project
+npx @neteasecloudmusicapienhanced/api-framework init my-project
 
 # enter directory
 cd my-project
@@ -168,7 +168,7 @@ module.exports = {
 ## npm Library Usage
 
 ```javascript
-const api = require('api-framework')
+const api = require('@neteasecloudmusicapienhanced/api-framework')
 
 // start server
 const app = await api.server.createApp()

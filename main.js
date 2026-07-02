@@ -1,7 +1,7 @@
 /**
  * api-framework npm module entry
  * Programmatic usage:
- *   const api = require('api-framework')
+ *   const api = require('@neteasecloudmusicapienhanced/api-framework')
  *   const result = await api.album({ id: '123' })
  *   const server = await api.server.createApp()
  */

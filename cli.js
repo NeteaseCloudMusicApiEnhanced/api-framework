@@ -87,7 +87,7 @@ async function initProject(projectName) {
     "start": "api-framework start"
   },
   "dependencies": {
-    "api-framework": "^${PKG.version}"
+    "@neteasecloudmusicapienhanced/api-framework": "^${PKG.version}"
   }
 }
 `,
