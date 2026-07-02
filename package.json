@@ -1,0 +1,50 @@
+{
+  "name": "api-framework",
+  "version": "1.0.0",
+  "description": "A generic API reverse proxy framework for reverse engineers to DIY platform API reverse proxies",
+  "type": "commonjs",
+  "main": "main.js",
+  "bin": {
+    "api-framework": "./cli.js"
+  },
+  "scripts": {
+    "dev": "node cli.js dev",
+    "start": "node cli.js start",
+    "init": "node cli.js init"
+  },
+  "keywords": [
+    "api",
+    "reverse-proxy",
+    "framework",
+    "express"
+  ],
+  "author": "",
+  "license": "MIT",
+  "files": [
+    "app.js",
+    "main.js",
+    "server.js",
+    "cli.js",
+    "config.js",
+    "module/",
+    "util/",
+    "plugins/",
+    "template/",
+    "public/"
+  ],
+  "dependencies": {
+    "axios": "^1.18.1",
+    "chalk": "^4.1.2",
+    "chokidar": "^3.6.0",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "express-fileupload": "^1.5.1",
+    "yargs": "^17.7.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.9"
+  },
+  "engines": {
+    "node": ">=14"
+  }
+}
