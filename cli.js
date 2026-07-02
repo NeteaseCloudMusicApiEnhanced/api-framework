@@ -124,9 +124,11 @@ async function start() {
   try {
     logger.info('Starting server...')
     const app = await createApp()
-    const instance = await startServer(app, config.port || 3000, config.host || '0.0.0.0')
-    const host = config.host === '0.0.0.0' ? 'localhost' : config.host
-    logger.success('Server started @ http://' + host + ':' + (config.port || 3000))
+    const port = config.port || 3000
+    const host = config.host || '0.0.0.0'
+    const instance = await startServer(app, port, host)
+    const displayHost = host === '0.0.0.0' ? 'localhost' : host
+    logger.success('Server started @ http://' + displayHost + ':' + port)
     return instance
   } catch (err) {
     logger.error('Failed to start:', err.message)
@@ -180,6 +182,43 @@ module.exports = async (ctx, core) => {
     },
   }
 }
+`,
+    'public/index.html': `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${projectName}</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f5; margin: 0; padding: 40px 20px; color: #333; }
+    .container { max-width: 600px; margin: 0 auto; }
+    h1 { font-size: 24px; font-weight: 600; margin: 0 0 4px 0; }
+    .subtitle { color: #888; font-size: 14px; margin: 0 0 24px 0; }
+    .status { display: inline-block; background: #e8f5e9; color: #2e7d32; font-size: 13px; padding: 4px 12px; border-radius: 3px; margin-bottom: 20px; }
+    table { width: 100%; border-collapse: collapse; background: #fff; border: 1px solid #e0e0e0; border-radius: 4px; }
+    td { padding: 10px 16px; border-bottom: 1px solid #f0f0f0; font-size: 14px; }
+    td:first-child { color: #888; width: 80px; }
+    td:last-child { color: #333; }
+    tr:last-child td { border-bottom: none; }
+    .footer { margin-top: 24px; font-size: 12px; color: #aaa; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>${projectName}</h1>
+    <p class="subtitle">API Reverse Proxy</p>
+    <div class="status">running</div>
+    <table>
+      <tr><td>Status</td><td>normal</td></tr>
+      <tr><td>Time</td><td id="time">-</td></tr>
+    </table>
+    <div class="footer">api-framework</div>
+  </div>
+  <script>
+    document.getElementById('time').textContent = new Date().toLocaleString('en-US')
+  </script>
+</body>
+</html>
 `,
   }
 

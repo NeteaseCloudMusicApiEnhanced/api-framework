@@ -1,6 +1,6 @@
 {
   "name": "@neteasecloudmusicapienhanced/api-framework",
-  "version": "1.0.3",
+  "version": "1.1.0",
   "description": "A generic API reverse proxy framework for reverse engineers to DIY platform API reverse proxies",
   "type": "commonjs",
   "main": "main.js",
