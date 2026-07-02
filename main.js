@@ -72,6 +72,9 @@ module.exports = {
   /** config object */
   config,
 
+  /** logger instance */
+  logger: require('./util/logger'),
+
   /** all module methods */
   ...modules,
 }

@@ -109,6 +109,50 @@ module.exports = {
   // host: '0.0.0.0',
 }
 `,
+    'app.js': `#!/usr/bin/env node
+/**
+ * Project entry point
+ */
+'use strict'
+
+const framework = require('@neteasecloudmusicapienhanced/api-framework')
+const { createApp, startServer } = framework.server
+const config = require('./config')
+const logger = framework.logger
+
+async function start() {
+  try {
+    logger.info('Starting server...')
+    const app = await createApp()
+    const instance = await startServer(app, config.port || 3000, config.host || '0.0.0.0')
+    const host = config.host === '0.0.0.0' ? 'localhost' : config.host
+    logger.success('Server started @ http://' + host + ':' + (config.port || 3000))
+    return instance
+  } catch (err) {
+    logger.error('Failed to start:', err.message)
+    process.exit(1)
+  }
+}
+
+if (require.main === module) {
+  start()
+}
+
+module.exports = { start }
+`,
+    'main.js': `/**
+ * Project npm module entry
+ */
+'use strict'
+
+const api = require('@neteasecloudmusicapienhanced/api-framework')
+const config = require('./config')
+
+module.exports = {
+  ...api,
+  config,
+}
+`,
     'module/example.js': `/**
  * Example API module
  *

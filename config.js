@@ -7,6 +7,8 @@
 const path = require('path')
 require('dotenv').config()
 
+const cwd = process.cwd()
+
 const config = {
   // server port
   port: parseInt(process.env.PORT, 10) || 3000,
@@ -15,13 +17,13 @@ const config = {
   host: process.env.HOST || '0.0.0.0',
 
   // static files directory
-  publicDir: process.env.PUBLIC_DIR || path.join(__dirname, 'public'),
+  publicDir: process.env.PUBLIC_DIR || path.join(cwd, 'public'),
 
   // modules directory
-  moduleDir: process.env.MODULE_DIR || path.join(__dirname, 'module'),
+  moduleDir: process.env.MODULE_DIR || path.join(cwd, 'module'),
 
   // plugins directory
-  pluginsDir: process.env.PLUGINS_DIR || path.join(__dirname, 'plugins'),
+  pluginsDir: process.env.PLUGINS_DIR || path.join(cwd, 'plugins'),
 
   // max upload size (MB)
   maxUploadSize: parseInt(process.env.MAX_UPLOAD_SIZE, 10) || 100,
