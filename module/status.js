@@ -1,6 +1,6 @@
 /**
- * 服务状态接口
- * 访问: GET /status
+ * Server status endpoint
+ * Access: GET /api/status
  */
 'use strict'
 

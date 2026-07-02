@@ -1,10 +1,10 @@
 /**
- * AES 加密/解密 示例
- * 
- * 注意：这只是一个参考实现，具体平台的加密逻辑
- * 需要根据目标平台的实际情况进行适配。
- * 请将此文件复制为新的加密文件（如 platform-crypto.js）
- * 并根据目标平台的加密要求修改。
+ * AES encrypt/decrypt example
+ *
+ * Note: This is a reference implementation only. Actual platform-specific
+ * encryption logic should be implemented based on the target platform's requirements.
+ * Copy this file to create a new encryption module (e.g. platform-crypto.js)
+ * and modify according to the target platform.
  */
 'use strict'
 
@@ -16,13 +16,13 @@ const ALGORITHM_AES_128_ECB = 'aes-128-ecb'
 const ALGORITHM_AES_256_ECB = 'aes-256-ecb'
 
 /**
- * AES 加密
- * @param {string|Buffer} data 明文
- * @param {string} key 密钥
- * @param {string} [iv] 初始化向量
- * @param {string} [algorithm=aes-128-cbc] 算法
- * @param {string} [encoding=hex] 输出编码
- * @returns {string} 密文
+ * AES encrypt
+ * @param {string|Buffer} data plaintext
+ * @param {string} key secret key
+ * @param {string} [iv] initialization vector
+ * @param {string} [algorithm=aes-128-cbc] algorithm
+ * @param {string} [encoding=hex] output encoding
+ * @returns {string} ciphertext
  */
 function aesEncrypt(data, key, iv = '', algorithm = ALGORITHM_AES_128_CBC, encoding = 'hex') {
   const cipher = crypto.createCipheriv(
@@ -38,13 +38,13 @@ function aesEncrypt(data, key, iv = '', algorithm = ALGORITHM_AES_128_CBC, encod
 }
 
 /**
- * AES 解密
- * @param {string|Buffer} data 密文
- * @param {string} key 密钥
- * @param {string} [iv] 初始化向量
- * @param {string} [algorithm=aes-128-cbc] 算法
- * @param {string} [encoding=hex] 输入编码
- * @returns {string} 明文
+ * AES decrypt
+ * @param {string|Buffer} data ciphertext
+ * @param {string} key secret key
+ * @param {string} [iv] initialization vector
+ * @param {string} [algorithm=aes-128-cbc] algorithm
+ * @param {string} [encoding=hex] input encoding
+ * @returns {string} plaintext
  */
 function aesDecrypt(data, key, iv = '', algorithm = ALGORITHM_AES_128_CBC, encoding = 'hex') {
   const input = typeof data === 'string' ? Buffer.from(data, encoding) : data

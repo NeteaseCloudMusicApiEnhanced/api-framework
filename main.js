@@ -1,9 +1,9 @@
 /**
- * api-framework NPM 模块入口
- * 以编程方式使用:
+ * api-framework npm module entry
+ * Programmatic usage:
  *   const api = require('api-framework')
  *   const result = await api.album({ id: '123' })
- *   const server = await api.server.serveNcmApi()
+ *   const server = await api.server.createApp()
  */
 'use strict'
 
@@ -11,7 +11,7 @@ const fs = require('fs')
 const path = require('path')
 const config = require('./config')
 
-// ---- 自动加载模块 ----
+// ---- auto load modules ----
 
 /** @type {Record<string, Function>} */
 const modules = {}
@@ -51,17 +51,17 @@ if (fs.existsSync(moduleDir)) {
           return null
         }
       } catch (err) {
-        console.error(`[main] 加载模块失败: ${file}`, err.message)
+        console.error(`[main] Failed to load module: ${file}`, err.message)
       }
     })
 }
 
-// ---- 导出 ----
+// ---- exports ----
 
 let serverModule = null
 
 module.exports = {
-  /** 服务器模块（懒加载） */
+  /** server module (lazy loaded) */
   get server() {
     if (!serverModule) {
       serverModule = require('./server')
@@ -69,9 +69,9 @@ module.exports = {
     return serverModule
   },
 
-  /** 配置文件 */
+  /** config object */
   config,
 
-  /** 所有模块方法 */
+  /** all module methods */
   ...modules,
 }

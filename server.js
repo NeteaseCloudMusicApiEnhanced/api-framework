@@ -1,6 +1,6 @@
 /**
- * api-framework 核心服务器
- * Express + 模块自动扫描 + 插件生命周期
+ * api-framework core server
+ * Express + module auto scanner + plugin lifecycle
  */
 'use strict'
 
@@ -13,10 +13,10 @@ const logger = require('./util/logger')
 const { cookieToJson } = require('./util/helpers')
 const { cacheMiddleware } = require('./util/cache')
 
-// ---- 插件系统 ----
+// ---- plugin system ----
 
 /**
- * 加载插件
+ * Load plugins
  * @param {string} pluginsDir
  * @returns {object[]}
  */
@@ -33,9 +33,9 @@ function loadPlugins(pluginsDir) {
         const plugin = require(pluginPath)
         const name = file.replace(/\.js$/, '')
         plugins.push({ name, ...plugin })
-        logger.debug(`加载插件: ${name}`)
+        logger.debug(`Loaded plugin: ${name}`)
       } catch (err) {
-        logger.error(`加载插件失败: ${file}`, err.message)
+        logger.error(`Failed to load plugin: ${file}`, err.message)
       }
     })
 
@@ -43,7 +43,7 @@ function loadPlugins(pluginsDir) {
 }
 
 /**
- * 执行插件生命周期钩子
+ * Run plugin lifecycle hooks
  */
 async function runPluginHook(plugins, hook, context = {}) {
   for (const plugin of plugins) {
@@ -51,16 +51,16 @@ async function runPluginHook(plugins, hook, context = {}) {
       try {
         await plugin[hook](context)
       } catch (err) {
-        logger.error(`插件 ${plugin.name} 的 ${hook} 钩子执行失败:`, err.message)
+        logger.error(`Plugin ${plugin.name} hook ${hook} failed:`, err.message)
       }
     }
   }
 }
 
-// ---- 模块扫描 ----
+// ---- module scanner ----
 
 /**
- * 扫描并加载模块
+ * Scan and load modules
  * @param {string} modulesPath
  * @param {object} [routeOverrides]
  * @returns {Array<{identifier: string, route: string, module: any}>}
@@ -68,7 +68,7 @@ async function runPluginHook(plugins, hook, context = {}) {
 function scanModules(modulesPath, routeOverrides = {}) {
   const modules = []
   if (!fs.existsSync(modulesPath)) {
-    logger.warn(`模块目录不存在: ${modulesPath}`)
+    logger.warn(`Module directory not found: ${modulesPath}`)
     return modules
   }
 
@@ -81,26 +81,26 @@ function scanModules(modulesPath, routeOverrides = {}) {
         const identifier = file.replace(/\.js$/, '')
         const mod = require(filePath)
 
-        // 判断导出格式
+        // detect export format
         let route, handler, method
 
         if (typeof mod === 'function') {
-          // 函数式: module.exports = async (ctx, core) => {}
+          // function style: module.exports = async (ctx, core) => {}
           route = routeOverrides[file] || `/${identifier.replace(/_/g, '/')}`
           handler = mod
           method = 'all'
         } else if (mod && typeof mod === 'object') {
-          // 对象式: module.exports = { route, method, handler }
+          // object style: module.exports = { route, method, handler }
           route = mod.route || routeOverrides[file] || `/${identifier.replace(/_/g, '/')}`
           handler = mod.handler
           method = (mod.method || 'all').toLowerCase()
         } else {
-          logger.warn(`跳过无效模块: ${file}`)
+          logger.warn(`Skipped invalid module: ${file}`)
           return
         }
 
         if (typeof handler !== 'function') {
-          logger.warn(`模块 ${file} 缺少有效的 handler`)
+          logger.warn(`Module ${file} missing valid handler`)
           return
         }
 
@@ -112,36 +112,36 @@ function scanModules(modulesPath, routeOverrides = {}) {
           method,
         })
 
-        logger.debug(`扫描模块: ${identifier} -> ${method.toUpperCase()} ${route}`)
+        logger.debug(`Scanned module: ${identifier} -> ${method.toUpperCase()} ${route}`)
       } catch (err) {
-        logger.error(`加载模块失败: ${file}`, err.message)
+        logger.error(`Failed to load module: ${file}`, err.message)
       }
     })
 
   return modules
 }
 
-// ---- 核心应用工厂 ----
+// ---- core app factory ----
 
 /**
- * 创建 Express 应用
+ * Create Express application
  * @param {object} [options]
- * @param {Array} [options.moduleDefs] 自定义模块定义（覆盖自动扫描）
- * @param {Array} [options.plugins] 自定义插件列表
+ * @param {Array} [options.moduleDefs] custom module definitions (overrides auto-scan)
+ * @param {Array} [options.plugins] custom plugin list
  * @returns {Promise<import('express').Express>}
  */
 async function createApp(options = {}) {
   const app = express()
 
-  // 加载插件
+  // load plugins
   const plugins = options.plugins || loadPlugins(config.pluginsDir)
 
-  // ---- beforeServer 钩子 ----
+  // ---- beforeServer hook ----
   await runPluginHook(plugins, 'beforeServer', { app, config })
 
-  // ---- 中间件 ----
+  // ---- middleware ----
 
-  // 静态文件
+  // static files
   app.use(express.static(config.publicDir))
 
   // CORS
@@ -167,13 +167,13 @@ async function createApp(options = {}) {
     next()
   })
 
-  // Cookie 解析
+  // Cookie parser
   app.use((req, _, next) => {
     req.cookies = cookieToJson(req.headers.cookie || '')
     next()
   })
 
-  // Body 解析
+  // Body parser
   const uploadLimit = `${config.maxUploadSize}mb`
   app.use(express.json({ limit: uploadLimit }))
   app.use(express.urlencoded({ extended: false, limit: uploadLimit }))
@@ -187,23 +187,23 @@ async function createApp(options = {}) {
     }),
   )
 
-  // 缓存中间件
+  // cache middleware
   if (config.enableCache) {
     app.use(cacheMiddleware(config.cacheTTL))
   }
 
-  // ---- 扫描并注册模块路由 ----
+  // ---- scan and register module routes ----
   const moduleDefs = options.moduleDefs || scanModules(config.moduleDir)
 
   for (const modDef of moduleDefs) {
     const { route, handler, method } = modDef
 
     app[method](route, async (req, res) => {
-      // ---- beforeRequest 钩子 ----
+      // ---- beforeRequest hook ----
       const hookContext = { req, res, module: modDef }
       await runPluginHook(plugins, 'beforeRequest', hookContext)
 
-      // 构建 ctx
+      // build ctx
       const ctx = {
         query: { ...req.query, ...req.body, ...req.files },
         body: req.body || {},
@@ -215,7 +215,7 @@ async function createApp(options = {}) {
         ip: req.ip,
       }
 
-      // 构建 core
+      // build core
       const request = require('./util/request')
       const cache = require('./util/cache')
       const core = {
@@ -231,29 +231,29 @@ async function createApp(options = {}) {
         let result
 
         if (typeof modDef.module === 'function') {
-          // 函数式: handler(ctx, core)
+          // function style: handler(ctx, core)
           result = await handler(ctx, core)
         } else if (modDef.module && typeof modDef.module === 'object') {
-          // 对象式: handler 就是 modDef.handler
+          // object style: handler is modDef.handler
           result = await handler(ctx, core)
         }
 
-        // ---- afterRequest 钩子 ----
+        // ---- afterRequest hook ----
         await runPluginHook(plugins, 'afterRequest', { ...hookContext, result })
 
-        // 处理返回值
+        // handle response
         if (!result) {
           res.status(404).json({ code: 404, msg: 'Not Found' })
           return
         }
 
-        // 支持重定向
+        // support redirect
         if (result.redirectUrl) {
           res.redirect(result.status || 302, result.redirectUrl)
           return
         }
 
-        // 设置 Cookie
+        // set Cookie
         if (result.cookie && !ctx.query.noCookie) {
           const cookies = Array.isArray(result.cookie) ? result.cookie : [result.cookie]
           cookies.forEach((c) => {
@@ -261,13 +261,13 @@ async function createApp(options = {}) {
           })
         }
 
-        // 返回响应
+        // send response
         const statusCode = result.status || 200
         res.status(statusCode).json(result.body !== undefined ? result.body : result)
       } catch (err) {
-        logger.error(`[${modDef.identifier}] 处理失败:`, err.message)
+        logger.error(`[${modDef.identifier}] handler failed:`, err.message)
 
-        // ---- onError 钩子 ----
+        // ---- onError hook ----
         await runPluginHook(plugins, 'onError', { ...hookContext, error: err })
 
         res.status(500).json({
@@ -277,17 +277,17 @@ async function createApp(options = {}) {
       }
     })
 
-    logger.info(`注册路由: ${method.toUpperCase()} ${route}`)
+    logger.info(`Registered route: ${method.toUpperCase()} ${route}`)
   }
 
-  // ---- afterRoutes 钩子 ----
+  // ---- afterRoutes hook ----
   await runPluginHook(plugins, 'afterRoutes', { app, config })
 
   return app
 }
 
 /**
- * 启动 HTTP 服务
+ * Start HTTP server
  * @param {import('express').Express} app
  * @param {number} port
  * @param {string} host

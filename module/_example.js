@@ -1,26 +1,26 @@
 /**
- * 模块示例 - 展示两种导出风格
- * 
- * 风格一：函数式（推荐）
+ * Module example - shows two export styles
+ *
+ * Style 1: Function style (recommended)
  *   module.exports = async (ctx, core) => { ... }
- *   路由自动根据文件名生成：/_example
- * 
- * 风格二：对象式（需要自定义路由/方法时用）
+ *   Route auto-generated from filename: /_example
+ *
+ * Style 2: Object style (for custom route/method)
  *   module.exports = { route, method, handler }
  */
 
 // ==========================================
-// 风格一：函数式（默认导出）
+// Style 1: Function style (default export)
 // ==========================================
 
-// 取消注释即可启用：
+// Uncomment to enable:
 // module.exports = async (ctx, core) => {
 //   const { query, body, cookies, files, headers } = ctx
 //   const { request, logger, config, cache } = core
 //
-//   logger.info('收到请求:', query)
+//   logger.info('Request received:', query)
 //
-//   // 使用 request 调用目标 API
+//   // use request to call target API
 //   const result = await request('/api/example', {
 //     id: query.id,
 //   }, {
@@ -36,34 +36,34 @@
 // }
 
 // ==========================================
-// 风格二：对象式（自定义路由/方法）
+// Style 2: Object style (custom route/method)
 // ==========================================
 
 module.exports = {
-  // 自定义路由（可选，默认根据文件名生成）
+  // custom route (optional, defaults to filename-based)
   route: '/example',
 
-  // HTTP 方法（可选，默认 all）
+  // HTTP method (optional, defaults to 'all')
   method: 'all',
 
-  // 请求处理器
+  // request handler
   handler: async (ctx, core) => {
     const { query, body, cookies } = ctx
     const { request, logger, config, cache } = core
 
-    logger.info('示例模块被调用喵~')
+    logger.info('Example module invoked')
 
-    // 检查是否有缓存
+    // check cache
     const cached = cache.get('example_data')
     if (cached) {
-      logger.info('返回缓存数据')
+      logger.info('Returning cached data')
       return {
         status: 200,
         body: { code: 200, data: cached, fromCache: true },
       }
     }
 
-    // 使用 request 请求外部 API
+    // use request to call external API
     const response = await request('/api/external-endpoint', {
       param1: query.param1 || body.param1 || 'default',
     }, {
@@ -74,7 +74,7 @@ module.exports = {
       },
     })
 
-    // 缓存结果
+    // cache result
     cache.set('example_data', response.body, 60)
 
     return {

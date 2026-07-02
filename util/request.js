@@ -1,6 +1,6 @@
 /**
- * 通用 HTTP 请求引擎 (axios 封装)
- * 支持代理、Cookie 透传、超时设置
+ * Generic HTTP request engine (axios wrapper)
+ * Supports proxy, cookie forwarding, timeout
  */
 'use strict'
 
@@ -9,19 +9,19 @@ const logger = require('./logger')
 const config = require('../config')
 
 /**
- * 发送 HTTP 请求
- * @param {string} uri 请求路径（可包含 query string）
- * @param {object|string} data 请求体数据
- * @param {object} [options] 请求选项
- * @param {string} [options.method] HTTP 方法 (GET/POST/PUT/DELETE)
- * @param {object} [options.headers] 自定义请求头
+ * Send HTTP request
+ * @param {string} uri request path (may include query string)
+ * @param {object|string} data request body
+ * @param {object} [options] request options
+ * @param {string} [options.method] HTTP method (GET/POST/PUT/DELETE)
+ * @param {object} [options.headers] custom headers
  * @param {object|string} [options.cookie] Cookie
  * @param {string} [options.ua] User-Agent
- * @param {string} [options.proxy] 代理地址
- * @param {string} [options.realIP] 真实 IP
- * @param {number} [options.timeout] 超时时间 (ms)
- * @param {string} [options.responseType] 响应类型
- * @param {string} [options.baseURL] 基础 URL
+ * @param {string} [options.proxy] proxy URL
+ * @param {string} [options.realIP] real client IP
+ * @param {number} [options.timeout] timeout (ms)
+ * @param {string} [options.responseType] response type
+ * @param {string} [options.baseURL] base URL
  * @returns {Promise<{status: number, body: any, cookie: string[]}>}
  */
 async function createRequest(uri, data, options = {}) {
@@ -29,7 +29,7 @@ async function createRequest(uri, data, options = {}) {
   const baseURL = options.baseURL || ''
   const url = baseURL ? `${baseURL}${uri}` : uri
 
-  // 构建请求头
+  // build headers
   const headers = {
     'User-Agent':
       options.ua ||
@@ -38,7 +38,7 @@ async function createRequest(uri, data, options = {}) {
     ...(options.headers || {}),
   }
 
-  // 处理 Cookie
+  // handle cookie
   if (options.cookie) {
     if (typeof options.cookie === 'string') {
       headers['Cookie'] = options.cookie
@@ -49,13 +49,13 @@ async function createRequest(uri, data, options = {}) {
     }
   }
 
-  // 处理真实 IP
+  // handle real IP
   if (options.realIP) {
     headers['X-Real-IP'] = options.realIP
     headers['X-Forwarded-For'] = options.realIP
   }
 
-  // 构建 axios 配置
+  // build axios config
   const axiosConfig = {
     method,
     url,
@@ -63,17 +63,17 @@ async function createRequest(uri, data, options = {}) {
     timeout: options.timeout || config.requestTimeout,
     responseType: options.responseType || 'json',
     maxRedirects: 5,
-    validateStatus: () => true, // 不抛出 HTTP 错误状态
+    validateStatus: () => true, // do not throw on HTTP errors
   }
 
-  // 请求体
+  // request body
   if (method === 'GET') {
     axiosConfig.params = data
   } else {
     axiosConfig.data = data
   }
 
-  // 代理设置
+  // proxy settings
   const proxy = options.proxy || config.proxy
   if (proxy) {
     try {
@@ -91,7 +91,7 @@ async function createRequest(uri, data, options = {}) {
             : undefined,
       }
     } catch (e) {
-      logger.warn(`代理 URL 解析失败: ${proxy}`, e.message)
+      logger.warn(`Proxy URL parse failed: ${proxy}`, e.message)
     }
   }
 

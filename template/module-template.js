@@ -1,8 +1,8 @@
 /**
- * {name} 模块
- * 
- * 自动注册路由: /{name}
- * 函数式导出：module.exports = async (ctx, core) => { ... }
+ * {name} module
+ *
+ * Auto-registered route: /{name}
+ * Function style: module.exports = async (ctx, core) => { ... }
  */
 'use strict'
 
@@ -10,11 +10,11 @@ module.exports = async (ctx, core) => {
   const { query, body, cookies, files, headers } = ctx
   const { request, logger, config, cache } = core
 
-  logger.info('[{name}] 被调用:', JSON.stringify(query))
+  logger.info('[{name}] called:', JSON.stringify(query))
 
-  // ---- 在这里编写你的业务逻辑 ----
+  // ---- write your business logic here ----
 
-  // 示例：调用目标 API
+  // example: call target API
   // const result = await request('/target/api/endpoint', {
   //   param1: query.param1,
   // }, {
@@ -22,7 +22,7 @@ module.exports = async (ctx, core) => {
   //   cookie: cookies,
   // })
 
-  // 返回结果
+  // return result
   return {
     status: 200,
     body: {

@@ -1,6 +1,6 @@
 /**
- * 轻量级日志工具
- * 带颜色输出和分级控制
+ * Lightweight logger
+ * Color output with level control
  */
 'use strict'
 

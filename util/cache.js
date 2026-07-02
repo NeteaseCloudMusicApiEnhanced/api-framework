@@ -1,18 +1,18 @@
 /**
- * 轻量级内存缓存
+ * Lightweight in-memory cache
  */
 'use strict'
 
 class MemoryCache {
   constructor(ttl = 120) {
     this._store = new Map()
-    this._ttl = ttl * 1000 // 转为毫秒
+    this._ttl = ttl * 1000 // convert to ms
     this._timer = setInterval(() => this._cleanup(), 60000)
     this._timer.unref()
   }
 
   /**
-   * 获取缓存
+   * Get cached value
    * @param {string} key
    * @returns {any}
    */
@@ -27,10 +27,10 @@ class MemoryCache {
   }
 
   /**
-   * 设置缓存
+   * Set cached value
    * @param {string} key
    * @param {any} value
-   * @param {number} [ttl] 自定义 TTL（秒）
+   * @param {number} [ttl] custom TTL (seconds)
    */
   set(key, value, ttl) {
     const expires = Date.now() + (ttl ? ttl * 1000 : this._ttl)
@@ -38,7 +38,7 @@ class MemoryCache {
   }
 
   /**
-   * 删除缓存
+   * Delete cached value
    * @param {string} key
    */
   del(key) {
@@ -46,14 +46,14 @@ class MemoryCache {
   }
 
   /**
-   * 清空缓存
+   * Flush all cache
    */
   flush() {
     this._store.clear()
   }
 
   /**
-   * 获取缓存大小
+   * Get cache size
    * @returns {number}
    */
   get size() {
@@ -61,7 +61,7 @@ class MemoryCache {
   }
 
   /**
-   * 清理过期缓存
+   * Cleanup expired cache
    */
   _cleanup() {
     const now = Date.now()
@@ -73,7 +73,7 @@ class MemoryCache {
   }
 
   /**
-   * 销毁缓存（清理定时器）
+   * Destroy cache (clear timer)
    */
   destroy() {
     clearInterval(this._timer)
@@ -82,15 +82,15 @@ class MemoryCache {
 }
 
 /**
- * 中间件工厂 - 返回 Express 缓存中间件
- * @param {number} ttl 缓存时间（秒）
+ * Middleware factory - returns Express cache middleware
+ * @param {number} ttl cache TTL (seconds)
  * @returns {Function}
  */
 function cacheMiddleware(ttl = 120) {
   const cache = new MemoryCache(ttl)
 
   return (req, res, next) => {
-    // 只缓存 GET 请求
+    // only cache GET requests
     if (req.method !== 'GET') return next()
 
     const key = req.originalUrl
@@ -101,7 +101,7 @@ function cacheMiddleware(ttl = 120) {
       return
     }
 
-    // 劫持 res.json 来缓存响应
+    // intercept res.json to cache response
     const originalJson = res.json.bind(res)
     res.json = (body) => {
       cache.set(key, body)

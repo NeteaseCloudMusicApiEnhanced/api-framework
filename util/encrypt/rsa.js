@@ -1,19 +1,19 @@
 /**
- * RSA 加密/解密 示例
- * 
- * 注意：这只是一个参考实现，具体平台的加密逻辑
- * 需要根据目标平台的实际情况进行适配。
+ * RSA encrypt/decrypt example
+ *
+ * Note: This is a reference implementation only. Actual platform-specific
+ * encryption logic should be implemented based on the target platform's requirements.
  */
 'use strict'
 
 const crypto = require('crypto')
 
 /**
- * 使用公钥加密
- * @param {string} data 明文
- * @param {string} publicKey PEM 格式公钥
- * @param {string} [padding] 填充方式
- * @returns {string} Base64 编码密文
+ * RSA encrypt with public key
+ * @param {string} data plaintext
+ * @param {string} publicKey PEM formatted public key
+ * @param {string} [padding] padding scheme
+ * @returns {string} base64 encoded ciphertext
  */
 function rsaEncrypt(data, publicKey, padding = 'RSA_PKCS1_PADDING') {
   const buffer = Buffer.from(data)
@@ -28,11 +28,11 @@ function rsaEncrypt(data, publicKey, padding = 'RSA_PKCS1_PADDING') {
 }
 
 /**
- * 使用私钥解密
- * @param {string} data Base64 编码密文
- * @param {string} privateKey PEM 格式私钥
- * @param {string} [padding] 填充方式
- * @returns {string} 明文
+ * RSA decrypt with private key
+ * @param {string} data base64 encoded ciphertext
+ * @param {string} privateKey PEM formatted private key
+ * @param {string} [padding] padding scheme
+ * @returns {string} plaintext
  */
 function rsaDecrypt(data, privateKey, padding = 'RSA_PKCS1_PADDING') {
   const buffer = Buffer.from(data, 'base64')
@@ -47,8 +47,8 @@ function rsaDecrypt(data, privateKey, padding = 'RSA_PKCS1_PADDING') {
 }
 
 /**
- * 生成 RSA 密钥对
- * @param {number} [bits=2048] 密钥长度
+ * Generate RSA key pair
+ * @param {number} [bits=2048] key length
  * @returns {{ publicKey: string, privateKey: string }}
  */
 function generateKeyPair(bits = 2048) {

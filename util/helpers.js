@@ -1,10 +1,10 @@
 /**
- * 通用辅助函数
+ * General helper functions
  */
 'use strict'
 
 /**
- * 将 cookie 字符串解析为对象
+ * Parse cookie string to object
  * @param {string} cookieStr
  * @returns {object}
  */
@@ -21,7 +21,7 @@ function cookieToJson(cookieStr) {
 }
 
 /**
- * 将 cookie 对象转换为字符串
+ * Convert cookie object to string
  * @param {object} cookieObj
  * @returns {string}
  */
@@ -33,7 +33,7 @@ function cookieObjToString(cookieObj) {
 }
 
 /**
- * 将字符串转为 boolean
+ * Convert string to boolean
  * @param {any} val
  * @returns {boolean}
  */
@@ -44,7 +44,7 @@ function toBoolean(val) {
 }
 
 /**
- * 延迟函数
+ * Sleep for given ms
  * @param {number} ms
  * @returns {Promise<void>}
  */
@@ -53,7 +53,7 @@ function sleep(ms) {
 }
 
 /**
- * 深拷贝对象
+ * Deep clone object
  * @param {object} obj
  * @returns {object}
  */
@@ -63,7 +63,7 @@ function deepClone(obj) {
 }
 
 /**
- * 生成随机字符串
+ * Generate random string
  * @param {number} len
  * @returns {string}
  */
@@ -77,7 +77,7 @@ function randomString(len = 16) {
 }
 
 /**
- * 合并多个对象（忽略 undefined 值）
+ * Merge multiple objects (skip undefined values)
  * @param {...object} objects
  * @returns {object}
  */

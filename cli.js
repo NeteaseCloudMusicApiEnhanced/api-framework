@@ -1,13 +1,13 @@
 #!/usr/bin/env node
 /**
- * api-framework 命令行工具
- * 
- * 用法:
- *   api-framework init <project-name>   创建新项目
- *   api-framework dev                   开发模式（带热重载）
- *   api-framework start                 生产模式启动
- *   api-framework generate module <name>  生成新模块
- *   api-framework generate plugin <name>  生成新插件
+ * api-framework command line tool
+ *
+ * Usage:
+ *   api-framework init <project-name>   create a new project
+ *   api-framework dev                   development mode (with hot reload)
+ *   api-framework start                 production mode
+ *   api-framework generate module <name>  generate a new module
+ *   api-framework generate plugin <name>  generate a new plugin
  */
 'use strict'
 
@@ -21,7 +21,7 @@ const chalk = require('chalk')
 const PKG = require('./package.json')
 const logger = require('./util/logger')
 
-// ---- 辅助函数 ----
+// ---- helper functions ----
 
 function getTemplatePath(...segments) {
   return path.join(__dirname, 'template', ...segments)
@@ -42,26 +42,26 @@ function ensureDir(dir) {
   }
 }
 
-// ---- 命令实现 ----
+// ---- command implementations ----
 
 /**
- * init - 初始化新项目
+ * init - create a new project
  */
 async function initProject(projectName) {
   const targetDir = path.resolve(process.cwd(), projectName)
 
   if (fs.existsSync(targetDir)) {
-    console.error(chalk.red(`目录已存在: ${targetDir}`))
+    console.error(chalk.red(`Directory already exists: ${targetDir}`))
     process.exit(1)
   }
 
-  console.log(chalk.cyan(`\n🐱 正在创建新项目: ${projectName}\n`))
+  console.log(chalk.cyan(`\nCreating new project: ${projectName}\n`))
 
-  // 创建目录结构
+  // create directory structure
   const dirs = ['module', 'plugins', 'util/encrypt', 'public', 'template']
   dirs.forEach((d) => ensureDir(path.join(targetDir, d)))
 
-  // 复制模板文件
+  // copy template files
   const templateDir = getTemplatePath('project')
   if (fs.existsSync(templateDir)) {
     const files = fs.readdirSync(templateDir, { recursive: true })
@@ -74,7 +74,7 @@ async function initProject(projectName) {
     })
   }
 
-  // 生成默认文件
+  // generate default files
   const defaultFiles = {
     'package.json': `{
   "name": "${projectName}",
@@ -98,21 +98,21 @@ ENABLE_CACHE=true
 CACHE_TTL=120
 `,
     'config.js': `/**
- * 项目配置文件
- * 覆盖 api-framework 的默认配置
+ * Project configuration
+ * Overrides api-framework default config
  */
 'use strict'
 
 module.exports = {
-  // 在这里覆盖框架默认配置
+  // override framework defaults here
   // port: 3000,
   // host: '0.0.0.0',
 }
 `,
     'module/example.js': `/**
- * 示例 API 模块
- * 
- * 文件名自动转换为路由路径:
+ * Example API module
+ *
+ * File name is auto-converted to route path:
  *   user_login.js -> /user/login
  *   getSongUrl.js -> /get/song/url
  */
@@ -122,9 +122,9 @@ module.exports = async (ctx, core) => {
   const { query } = ctx
   const { request, logger } = core
 
-  logger.info('示例模块被调用:', query)
+  logger.info('Example module called:', query)
 
-  // 在这里调用目标 API
+  // call target API here
   // const result = await request('/target/api', { ... })
 
   return {
@@ -141,42 +141,42 @@ module.exports = async (ctx, core) => {
 
   Object.entries(defaultFiles).forEach(([name, content]) => {
     fs.writeFileSync(path.join(targetDir, name), content, 'utf-8')
-    console.log(chalk.green(`  ✔ 创建 ${name}`))
+    console.log(chalk.green(`  + created ${name}`))
   })
 
-  // 创建 util/index.js
+  // create util/index.js
   const utilIndex = `/**
- * 项目工具函数
- * 在这里添加你的辅助函数
+ * Project utility functions
+ * Add your helper functions here
  */
 'use strict'
 
 module.exports = {
-  // 你的工具函数...
+  // your utility functions...
 }
 `
   fs.writeFileSync(path.join(targetDir, 'util', 'index.js'), utilIndex, 'utf-8')
-  console.log(chalk.green(`  ✔ 创建 util/index.js`))
+  console.log(chalk.green(`  + created util/index.js`))
 
-  // 安装依赖
-  console.log(chalk.cyan('\n📦 正在安装依赖...\n'))
+  // install dependencies
+  console.log(chalk.cyan('\nInstalling dependencies...\n'))
   try {
     execSync('npm install', { cwd: targetDir, stdio: 'inherit' })
-    console.log(chalk.green('\n✅ 项目初始化完成！\n'))
+    console.log(chalk.green('\nProject initialization complete!\n'))
     console.log(chalk.cyan(`   cd ${projectName}`))
     console.log(chalk.cyan('   npm run dev\n'))
   } catch (err) {
-    console.warn(chalk.yellow('\n⚠️  依赖安装失败，请手动执行 npm install\n'))
+    console.warn(chalk.yellow('\nDependency installation failed, please run npm install manually\n'))
   }
 }
 
 /**
- * dev - 开发模式
+ * dev - development mode
  */
 async function devMode() {
-  console.log(chalk.cyan('\n🐱 开发模式启动中...\n'))
+  console.log(chalk.cyan('\nStarting development mode...\n'))
 
-  // 尝试使用 nodemon
+  // try to use nodemon
   try {
     const nodemonPath = require.resolve('nodemon/bin/nodemon.js')
     const child = spawn(
@@ -189,8 +189,8 @@ async function devMode() {
     )
     child.on('exit', (code) => process.exit(code))
   } catch {
-    // 没有 nodemon，使用 node
-    console.log(chalk.yellow('提示: 安装 nodemon 以获得热重载功能 (npm install nodemon --save-dev)'))
+    // no nodemon, use plain node
+    console.log(chalk.yellow('Tip: install nodemon for hot reload (npm install nodemon --save-dev)'))
     const child = spawn(process.execPath, ['app.js'], {
       stdio: 'inherit',
       cwd: process.cwd(),
@@ -200,10 +200,10 @@ async function devMode() {
 }
 
 /**
- * start - 生产模式
+ * start - production mode
  */
 async function startMode() {
-  console.log(chalk.cyan('\n🐱 生产模式启动中...\n'))
+  console.log(chalk.cyan('\nStarting production mode...\n'))
 
   const child = spawn(process.execPath, ['app.js'], {
     stdio: 'inherit',
@@ -213,7 +213,7 @@ async function startMode() {
 }
 
 /**
- * generate - 生成器
+ * generate - generator
  */
 async function generate(type, name) {
   const cwd = process.cwd()
@@ -221,31 +221,31 @@ async function generate(type, name) {
   switch (type) {
     case 'module': {
       if (!name) {
-        console.error(chalk.red('请指定模块名称'))
+        console.error(chalk.red('Please specify a module name'))
         process.exit(1)
       }
       const filePath = path.join(cwd, 'module', `${name}.js`)
       if (fs.existsSync(filePath)) {
-        console.error(chalk.red(`模块已存在: ${name}.js`))
+        console.error(chalk.red(`Module already exists: ${name}.js`))
         process.exit(1)
       }
       copyTemplate(getTemplatePath('module-template.js'), filePath, { name })
-      console.log(chalk.green(`✔ 模块已创建: module/${name}.js`))
+      console.log(chalk.green(`+ created module: ${name}.js`))
       break
     }
 
     case 'plugin': {
       if (!name) {
-        console.error(chalk.red('请指定插件名称'))
+        console.error(chalk.red('Please specify a plugin name'))
         process.exit(1)
       }
       const filePath = path.join(cwd, 'plugins', `${name}.js`)
       if (fs.existsSync(filePath)) {
-        console.error(chalk.red(`插件已存在: ${name}.js`))
+        console.error(chalk.red(`Plugin already exists: ${name}.js`))
         process.exit(1)
       }
       const pluginContent = `/**
- * ${name} 插件
+ * ${name} plugin
  */
 'use strict'
 
@@ -253,38 +253,38 @@ module.exports = {
   name: '${name}',
 
   beforeServer: async ({ app, config }) => {
-    // 服务器启动前逻辑
+    // logic before server starts
   },
 
   afterRoutes: async ({ app, config }) => {
-    // 路由注册完成后逻辑
+    // logic after routes are registered
   },
 
   beforeRequest: async ({ req, res, module }) => {
-    // 请求处理前逻辑
+    // logic before each request
   },
 
   afterRequest: async ({ req, res, module, result }) => {
-    // 请求处理后逻辑
+    // logic after each request
   },
 
   onError: async ({ req, res, module, error }) => {
-    // 错误处理逻辑
+    // error handling logic
   },
 }
 `
       fs.writeFileSync(filePath, pluginContent, 'utf-8')
-      console.log(chalk.green(`✔ 插件已创建: plugins/${name}.js`))
+      console.log(chalk.green(`+ created plugin: ${name}.js`))
       break
     }
 
     default:
-      console.error(chalk.red(`未知类型: ${type}，可用类型: module, plugin`))
+      console.error(chalk.red(`Unknown type: ${type}, available types: module, plugin`))
       process.exit(1)
   }
 }
 
-// ---- CLI 入口 ----
+// ---- CLI entry ----
 
 async function main() {
   yargs(hideBin(process.argv))
@@ -293,10 +293,10 @@ async function main() {
     .usage('$0 <command> [options]')
     .command(
       'init <project-name>',
-      '创建一个新的 API 项目',
+      'Create a new API project',
       (yargs) => {
         yargs.positional('project-name', {
-          describe: '项目名称',
+          describe: 'Project name',
           type: 'string',
         })
       },
@@ -304,39 +304,39 @@ async function main() {
     )
     .command(
       'dev',
-      '启动开发模式（带热重载）',
+      'Start development mode (with hot reload)',
       () => {},
       () => devMode(),
     )
     .command(
       'start',
-      '启动生产模式',
+      'Start production mode',
       () => {},
       () => startMode(),
     )
     .command(
       'generate <type> <name>',
-      '生成模块或插件',
+      'Generate a module or plugin',
       (yargs) => {
         yargs
           .positional('type', {
-            describe: '生成类型 (module|plugin)',
+            describe: 'Generation type (module|plugin)',
             type: 'string',
             choices: ['module', 'plugin'],
           })
           .positional('name', {
-            describe: '名称',
+            describe: 'Name',
             type: 'string',
           })
       },
       (argv) => generate(argv.type, argv.name),
     )
-    .demandCommand(1, '请指定一个命令')
+    .demandCommand(1, 'Please specify a command')
     .help()
     .strict().argv
 }
 
 main().catch((err) => {
-  console.error(chalk.red('发生错误:'), err.message)
+  console.error(chalk.red('Error:'), err.message)
   process.exit(1)
 })
