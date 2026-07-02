@@ -3,9 +3,11 @@
  * api-framework command line tool
  *
  * Usage:
- *   api-framework init <project-name>   create a new project
- *   api-framework dev                   development mode (with hot reload)
- *   api-framework start                 production mode
+ *   api-framework init                    interactive project wizard
+ *   api-framework init <project-name>     interactive wizard with pre-filled name
+ *   api-framework init <project-name> --pm <npm|pnpm>  non-interactive
+ *   api-framework dev                     development mode
+ *   api-framework start                   production mode
  *   api-framework generate module <name>  generate a new module
  *   api-framework generate plugin <name>  generate a new plugin
  */
@@ -17,6 +19,7 @@ const yargs = require('yargs')
 const { hideBin } = require('yargs/helpers')
 const { execSync, spawn } = require('child_process')
 const chalk = require('chalk')
+const { Input, Select } = require('enquirer')
 
 const PKG = require('./package.json')
 const logger = require('./util/logger')
@@ -42,21 +45,60 @@ function ensureDir(dir) {
   }
 }
 
+// ---- TUI wizard ----
+
+/**
+ * Interactive initialization wizard
+ */
+async function initWizard(defaults = {}) {
+  console.log(chalk.bold.cyan('\n  Welcome to api-framework!'))
+  console.log(chalk.dim('  Let\'s create a new API reverse proxy project.\n'))
+
+  const prompts = []
+
+  if (!defaults.name) {
+    prompts.push({
+      type: 'input',
+      name: 'name',
+      message: 'Project name',
+      initial: 'my-project',
+      validate: (v) => v && v.length > 0 ? true : 'Project name is required',
+    })
+  }
+
+  if (!defaults.pm) {
+    prompts.push({
+      type: 'select',
+      name: 'pm',
+      message: 'Package manager',
+      initial: 'npm',
+      choices: [
+        { name: 'npm', message: 'npm' },
+        { name: 'pnpm', message: 'pnpm' },
+      ],
+    })
+  }
+
+  const answers = {}
+
+  for (const prompt of prompts) {
+    const Prompt = prompt.type === 'input' ? Input : Select
+    const p = new Prompt(prompt)
+    answers[prompt.name] = await p.run()
+  }
+
+  return {
+    name: defaults.name || answers.name,
+    pm: defaults.pm || answers.pm,
+  }
+}
+
 // ---- command implementations ----
 
 /**
- * init - create a new project
+ * Scaffold project files
  */
-async function initProject(projectName) {
-  const targetDir = path.resolve(process.cwd(), projectName)
-
-  if (fs.existsSync(targetDir)) {
-    console.error(chalk.red(`Directory already exists: ${targetDir}`))
-    process.exit(1)
-  }
-
-  console.log(chalk.cyan(`\nCreating new project: ${projectName}\n`))
-
+async function scaffoldProject(targetDir, projectName, pkgManager) {
   // create directory structure
   const dirs = ['module', 'plugins', 'util/encrypt', 'public', 'template']
   dirs.forEach((d) => ensureDir(path.join(targetDir, d)))
@@ -83,11 +125,14 @@ async function initProject(projectName) {
   "type": "commonjs",
   "main": "main.js",
   "scripts": {
-    "dev": "api-framework dev",
-    "start": "api-framework start"
+    "dev": "nodemon --watch module --watch plugins --watch config.js --ext js,json app.js",
+    "start": "node app.js"
   },
   "dependencies": {
     "@neteasecloudmusicapienhanced/api-framework": "^${PKG.version}"
+  },
+  "devDependencies": {
+    "nodemon": "^3"
   }
 }
 `,
@@ -240,16 +285,50 @@ module.exports = {
 `
   fs.writeFileSync(path.join(targetDir, 'util', 'index.js'), utilIndex, 'utf-8')
   console.log(chalk.green(`  + created util/index.js`))
+}
+
+/**
+ * init - create a new project
+ * Supports both interactive wizard and non-interactive mode
+ */
+async function initProject(projectName, pm) {
+  // If both name and pm are provided, skip wizard (non-interactive mode)
+  const hasName = projectName && projectName.length > 0
+  const hasPm = pm && pm.length > 0
+
+  let answers
+
+  if (hasName && hasPm) {
+    // non-interactive: use provided values
+    answers = { name: projectName, pm }
+  } else {
+    // interactive TUI wizard
+    answers = await initWizard({ name: hasName ? projectName : null, pm: hasPm ? pm : null })
+  }
+
+  const targetDir = path.resolve(process.cwd(), answers.name)
+  const pkgManager = answers.pm
+
+  if (fs.existsSync(targetDir)) {
+    console.error(chalk.red(`Directory already exists: ${targetDir}`))
+    process.exit(1)
+  }
+
+  console.log(chalk.cyan(`\nCreating new project: ${answers.name}\n`))
+  console.log(chalk.dim(`  Package manager: ${pkgManager}\n`))
+
+  await scaffoldProject(targetDir, answers.name, pkgManager)
 
   // install dependencies
+  const installCmd = pkgManager === 'pnpm' ? 'pnpm install' : 'npm install'
   console.log(chalk.cyan('\nInstalling dependencies...\n'))
   try {
-    execSync('npm install', { cwd: targetDir, stdio: 'inherit' })
+    execSync(installCmd, { cwd: targetDir, stdio: 'inherit' })
     console.log(chalk.green('\nProject initialization complete!\n'))
-    console.log(chalk.cyan(`   cd ${projectName}`))
-    console.log(chalk.cyan('   npm run dev\n'))
+    console.log(chalk.cyan(`   cd ${answers.name}`))
+    console.log(chalk.cyan(`   ${pkgManager} run dev\n`))
   } catch (err) {
-    console.warn(chalk.yellow('\nDependency installation failed, please run npm install manually\n'))
+    console.warn(chalk.yellow(`\nDependency installation failed, please run ${installCmd} manually\n`))
   }
 }
 
@@ -257,29 +336,13 @@ module.exports = {
  * dev - development mode
  */
 async function devMode() {
-  console.log(chalk.cyan('\nStarting development mode...\n'))
+  console.log(chalk.cyan('\nStarting development mode...'))
 
-  // try to use nodemon
-  try {
-    const nodemonPath = require.resolve('nodemon/bin/nodemon.js')
-    const child = spawn(
-      process.execPath,
-      [nodemonPath, '--watch', 'module', '--watch', 'plugins', '--watch', 'config.js', '--ext', 'js,json', 'app.js'],
-      {
-        stdio: 'inherit',
-        cwd: process.cwd(),
-      },
-    )
-    child.on('exit', (code) => process.exit(code))
-  } catch {
-    // no nodemon, use plain node
-    console.log(chalk.yellow('Tip: install nodemon for hot reload (npm install nodemon --save-dev)'))
-    const child = spawn(process.execPath, ['app.js'], {
-      stdio: 'inherit',
-      cwd: process.cwd(),
-    })
-    child.on('exit', (code) => process.exit(code))
-  }
+  const child = spawn(process.execPath, ['app.js'], {
+    stdio: 'inherit',
+    cwd: process.cwd(),
+  })
+  child.on('exit', (code) => process.exit(code))
 }
 
 /**
@@ -375,19 +438,25 @@ async function main() {
     .version(PKG.version)
     .usage('$0 <command> [options]')
     .command(
-      'init <project-name>',
-      'Create a new API project',
+      'init [project-name]',
+      'Create a new API project (interactive wizard)',
       (yargs) => {
         yargs.positional('project-name', {
-          describe: 'Project name',
+          describe: 'Project name (optional, wizard will prompt if omitted)',
           type: 'string',
         })
+        yargs.option('pm', {
+          alias: 'package-manager',
+          describe: 'Package manager (npm or pnpm). Skips wizard when combined with project name',
+          type: 'string',
+          choices: ['npm', 'pnpm'],
+        })
       },
-      (argv) => initProject(argv['project-name']),
+      (argv) => initProject(argv['project-name'], argv.pm),
     )
     .command(
       'dev',
-      'Start development mode (with hot reload)',
+      'Start development mode (run app.js)',
       () => {},
       () => devMode(),
     )

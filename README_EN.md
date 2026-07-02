@@ -7,7 +7,7 @@ A generic API reverse proxy framework for reverse engineers to build platform AP
 - **Auto routing** - module files are auto-scanned and registered, filename becomes route path
 - **Dual module style** - supports function style `module.exports = async (ctx, core) => {}` and object style `module.exports = { route, method, handler }`
 - **Plugin system** - lifecycle hooks: beforeServer, afterRoutes, beforeRequest, afterRequest, onError
-- **CLI tool** - commands: init, dev, start, generate
+- **CLI tool** - commands: init (TUI wizard), dev, start, generate
 - **Encryption examples** - AES, RSA, MD5 reference implementations in util/encrypt/ (no platform-specific crypto bundled)
 - **npm library mode** - can be used programmatically as a Node.js library
 - **Lightweight** - no database dependency, in-memory cache only
@@ -27,13 +27,19 @@ npm install -g @neteasecloudmusicapienhanced/api-framework
 ## Quick Start
 
 ```bash
-# create a new project
+# interactive initialization wizard (recommended)
+npx @neteasecloudmusicapienhanced/api-framework init
+
+# or provide a project name (still prompts for package manager)
 npx @neteasecloudmusicapienhanced/api-framework init my-project
+
+# or fully non-interactive (for scripts/CI)
+npx @neteasecloudmusicapienhanced/api-framework init my-project --pm pnpm
 
 # enter directory
 cd my-project
 
-# start development mode
+# start development mode (nodemon hot reload)
 npm run dev
 ```
 
@@ -41,11 +47,16 @@ npm run dev
 
 | Command | Description |
 |---------|-------------|
-| `init <name>` | Create a new project |
-| `dev` | Development mode (hot reload) |
+| `init [name]` | Interactive setup wizard (optional project name, `--pm` to choose npm/pnpm) |
+| `dev` | Development mode (run app.js) |
 | `start` | Production mode |
 | `generate module <name>` | Generate a module template |
 | `generate plugin <name>` | Generate a plugin template |
+
+> **Tip:** `init` supports three modes:
+> - `npx ... init` — Full interactive TUI wizard, prompts for project name and package manager
+> - `npx ... init my-project` — Semi-interactive, name pre-filled, prompts only for package manager
+> - `npx ... init my-project --pm pnpm` — Non-interactive, suitable for scripts/CI
 
 ## Writing Modules
 

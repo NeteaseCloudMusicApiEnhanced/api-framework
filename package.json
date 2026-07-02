@@ -1,6 +1,6 @@
 {
   "name": "@neteasecloudmusicapienhanced/api-framework",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "A generic API reverse proxy framework for reverse engineers to DIY platform API reverse proxies",
   "type": "commonjs",
   "main": "main.js",
@@ -20,7 +20,7 @@
   ],
   "author": "",
   "license": "GNU General Public License v3.0",
-   "repository": {
+  "repository": {
     "type": "git",
     "url": "git+https://github.com/NeteaseCloudMusicApiEnhanced/api-framework.git"
   },
@@ -41,6 +41,7 @@
     "chalk": "^4.1.2",
     "chokidar": "^3.6.0",
     "dotenv": "^16.4.7",
+    "enquirer": "^2.4.1",
     "express": "^4.21.2",
     "express-fileupload": "^1.5.1",
     "yargs": "^17.7.2"

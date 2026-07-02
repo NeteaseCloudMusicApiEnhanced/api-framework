@@ -18,13 +18,19 @@ npm install -g @neteasecloudmusicapienhanced/api-framework
 ## 快速开始
 
 ```bash
-# 创建新项目
+# 交互式初始化向导（推荐）
+npx @neteasecloudmusicapienhanced/api-framework init
+
+# 或直接指定项目名（仍会交互询问包管理器）
 npx @neteasecloudmusicapienhanced/api-framework init my-project
+
+# 或完全非交互式（适用于脚本）
+npx @neteasecloudmusicapienhanced/api-framework init my-project --pm pnpm
 
 # 进入目录
 cd my-project
 
-# 启动开发模式
+# 启动开发模式（nodemon 热重载）
 npm run dev
 ```
 
@@ -32,11 +38,16 @@ npm run dev
 
 | 命令 | 说明 |
 |------|------|
-| `init <name>` | 创建新项目 |
-| `dev` | 开发模式（热重载） |
+| `init [name]` | 交互式初始化向导（可选项目名，支持 `--pm` 指定包管理器） |
+| `dev` | 开发模式（运行 app.js） |
 | `start` | 生产模式启动 |
 | `generate module <name>` | 生成模块模板 |
 | `generate plugin <name>` | 生成插件模板 |
+
+> **提示：** `init` 命令支持三种模式：
+> - `npx ... init` — 纯交互式 TUI 向导，依次询问项目名和包管理器
+> - `npx ... init my-project` — 半交互式，名字预填，只问包管理器
+> - `npx ... init my-project --pm pnpm` — 非交互式，适合 CI/脚本
 
 ## 模块编写
 
