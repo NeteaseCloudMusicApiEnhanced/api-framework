@@ -277,7 +277,7 @@ async function createApp(options = {}) {
       }
     })
 
-    logger.info(`Registered route: ${method.toUpperCase()} ${route}`)
+    // logger.info(`Registered route: ${method.toUpperCase()} ${route}`)
   }
 
   // ---- afterRoutes hook ----
